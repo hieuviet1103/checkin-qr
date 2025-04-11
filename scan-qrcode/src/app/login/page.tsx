@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       await login(email, password);
-      router.push('/dashboard');
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi đăng nhập');
       console.error(err);
@@ -35,11 +35,14 @@ export default function LoginPage() {
       <main className={styles.formSignin}>
         <form onSubmit={handleSubmit}>
           <div className="text-center mb-4">
-            <Image src={"/logo/logo-vtv.png" }
+            <Image 
+              src="/logo/logo-vtv.png"
               alt="Logo"
               width={120}
-              height={40}
-              className="mb-3"></Image>            
+              height={120}
+              className="mb-3"
+              priority
+            />            
             <h1 className="h4 mb-3 fw-normal">Hệ thống Check-in</h1>
           </div>
 
@@ -98,7 +101,7 @@ export default function LoginPage() {
           </button>
 
           <p className="mt-5 mb-3 text-body-secondary text-center">
-            © 2024 vietravel.com
+            © 2025 Vietravel
           </p>
         </form>
       </main>

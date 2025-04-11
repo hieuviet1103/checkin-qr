@@ -122,16 +122,20 @@ export default function Sidebar() {
             {!collapsed && <span>Users</span>}
           </Link>
         </li>
-        <li className="nav-item mt-auto">
-          <a 
-            className="nav-link d-flex align-items-center gap-2 cursor-pointer" 
+        <li>
+          <Link 
+            href="#" 
             onClick={logout}
-            style={{ cursor: 'pointer' }}
+            className={`nav-link ${pathname === '/login' ? 'active' : 'link-body-emphasis'}`}
+            data-title="logout"
           >
-            <i className="bi bi-box-arrow-right"></i>
-            Đăng xuất
-          </a>
+            <svg className="bi pe-none me-2" width="16" height="16">
+              <use xlinkHref="#house-dash-fill"></use>
+            </svg>
+            {!collapsed && <span>Logout</span>}
+          </Link>
         </li>
+        
       </ul>
       <hr />
       {!collapsed && (
