@@ -45,7 +45,7 @@ export default function Sidebar() {
         {!collapsed && (
           <Link href="/" className="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
             <svg className="bi pe-none me-2" width="40" height="32">
-              <use xlinkHref="#bootstrap"></use>
+              <use xlinkHref="#pin-map-fill"></use>
             </svg>
             <span className="fs-4">Check-in</span>
           </Link>
@@ -83,18 +83,6 @@ export default function Sidebar() {
               <use xlinkHref="#grid"></use>
             </svg>
             {!collapsed && <span>Scan QR</span>}
-          </Link>
-        </li>
-        <li>
-          <Link 
-            href="/checkin-result" 
-            className={`nav-link ${pathname === '/checkin-result2' ? 'active' : 'link-body-emphasis'}`}
-            data-title="Dashboard"
-          >
-            <svg className="bi pe-none me-2" width="16" height="16">
-              <use xlinkHref="#speedometer2"></use>
-            </svg>
-            {!collapsed && <span>Check-in Result</span>}
           </Link>
         </li>
         <li>

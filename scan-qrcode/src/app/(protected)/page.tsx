@@ -61,7 +61,7 @@ export default function Home() {
 
   // Chuyển hướng đến trang dashboard nếu đã đăng nhập
   if (user) {
-    router.push('/dashboard');
+    router.push('/');
     return null;
   }
 

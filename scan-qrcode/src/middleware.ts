@@ -21,7 +21,7 @@ export function middleware(request: NextRequest) {
   
   // Nếu có auth_token và đang ở trang login, chuyển hướng về trang chính
   if (authToken && isPublicPath) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
   
   return NextResponse.next();

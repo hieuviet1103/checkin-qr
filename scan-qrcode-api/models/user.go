@@ -42,9 +42,9 @@ func GetAllUsers() ([]User, error) {
 	var users []User
 	for rows.Next() {
 		var user User
-		var createdAt, updatedAt sql.NullTime
 		var role sql.NullString
 		var roles sql.NullString
+		var createdAt, updatedAt sql.NullTime
 
 		// Quét dữ liệu
 		err := rows.Scan(
@@ -52,6 +52,7 @@ func GetAllUsers() ([]User, error) {
 			&user.Username,
 			&user.Email,
 			&role,
+			&roles,
 			&createdAt,
 			&updatedAt,
 		)

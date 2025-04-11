@@ -9,17 +9,21 @@ interface User {
   name: string;
   email: string;
   role: string;
-  [key: string]: string | number | boolean | null;
+  roles: string[];
+  [key: string]: string | number | boolean | string[] | null;
 }
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     // Kiểm tra token và thông tin người dùng khi component mount
     const loadUser = () => {
+      if (initialized) return; // Chỉ load một lần
+
       setLoading(true);
       const token = Cookies.get('auth_token');
       const userJson = localStorage.getItem('user');
@@ -36,10 +40,11 @@ export const useAuth = () => {
         setUser(null);
       }
       setLoading(false);
+      setInitialized(true);
     };
 
     loadUser();
-  }, []);
+  }, [initialized]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -65,6 +70,7 @@ export const useAuth = () => {
       Cookies.set('auth_token', data.token, { expires: 1 });
       localStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);
+      setInitialized(true);
 
       return data.user;
     } catch (error) {
@@ -78,6 +84,7 @@ export const useAuth = () => {
     Cookies.remove('auth_token');
     localStorage.removeItem('user');
     setUser(null);
+    setInitialized(false);
     router.push('/login');
   };
 
@@ -89,5 +96,6 @@ export const useAuth = () => {
     login,
     logout,
     isAuthenticated,
+    initialized,
   };
 }; 
