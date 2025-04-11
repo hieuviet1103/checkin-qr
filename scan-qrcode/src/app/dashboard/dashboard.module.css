@@ -1,0 +1,52 @@
+.container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+  }
+  
+  .tableHeader,
+  .tableCell {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .tableHeader {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .tableRow:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .tableRow:hover {
+    background-color: #f1f1f1;
+  }
+
+  .vehicleFilter {
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .vehicleOption {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+  }
+  
+  .vehicleOption input {
+    margin-right: 5px;
+  }

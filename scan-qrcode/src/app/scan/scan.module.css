@@ -1,0 +1,107 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #0d6efd;
+  color: white;
+  width: 100%;
+  border-radius: 5px;
+}
+
+.scanSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.cameraControls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cameraSelect {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+}
+
+.resultInput {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  width: 100%;
+}
+
+.videoContainer {
+  position: relative;
+  /* width: 100%; */
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.preview {
+  width: 100%;
+  border: 2px solid #000;
+  border-radius: 4px;
+}
+
+.qrCodeArea {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  border: 3px dashed red;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.historySection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.historyTextarea {
+  width: 100%;
+  height: 200px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  resize: none;
+}
+
+.listButton {
+  padding: 8px 16px;
+  background-color: #0d6efd;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.listButton:hover {
+  background-color: #0b5ed7;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .videoContainer {
+    max-width: 100%;
+  }
+} 

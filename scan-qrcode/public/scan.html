@@ -1,0 +1,666 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/3.3.3/adapter.min.js"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">-->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://getbootstrap.com/docs/5.3/assets/css/docs.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
+    />
+
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh; /* Chiều cao toàn bộ màn hình */
+        margin: 0;
+        position: relative; /* Để định vị các thành phần con */
+      }
+
+      .header-title {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      #videoContainer {
+        position: relative; /* Cần để đặt ô vuông trong video */
+      }
+
+      #preview {
+        /*width: 640px;*/ /* Chiều rộng video */
+        /*height: 480px;*/ /* Chiều cao video */
+        border: 2px solid #000; /* Viền cho video */
+      }
+
+      #qrCodeArea {
+        position: absolute; /* Đặt vị trí tuyệt đối */
+        top: 50%; /* Giữa theo chiều dọc */
+        left: 50%; /* Giữa theo chiều ngang */
+        width: 200px; /* Chiều rộng ô vuông */
+        height: 200px; /* Chiều cao ô vuông */
+        border: 3px dashed red; /* Đường viền ô vuông */
+        transform: translate(-50%, -50%); /* Để căn chính giữa */
+        pointer-events: none; /* Không cho phép tương tác */
+      }
+
+      @media (max-width: 1000px) {
+        .main {
+          max-width: 720px;
+          align-self: flex-start;
+          padding-top: 20px;
+        }
+      }
+
+      /* Tăng opacity cho một loại thông báo cụ thể (ví dụ: thông báo thành công) */
+      .toast-success {
+        opacity: 1 !important; /* Ví dụ: opacity là 90% */
+      }
+
+      .toast-error {
+        opacity: 1 !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="main container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="header-title p-3 bg-primary text-white">
+            <h2>
+              Checkin
+              <span id="txtSessionName"> </span>
+            </h2>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12 col-md-12">
+          <div class="row">
+            <div class="col-12">
+              <label>SCAN QR CODE</label>
+              <select
+                id="cameraOption"
+                class="form-control"
+                onchange="changeCamera(this.value)"
+              >
+                <option>Choose Camera</option>
+              </select>
+              <input
+                type="text"
+                name="text"
+                id="text"
+                readonly
+                placeholder="qr code"
+                class="form-control"
+              />
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 col-md-8">
+              <div id="videoContainer">
+                <video
+                  class="embed-responsive-item"
+                  autoplay
+                  playsinline
+                  id="preview"
+                  width="100%"
+                ></video>
+                <div id="qrCodeArea"></div>
+              </div>
+            </div>
+            <div class="col-12 col-md-4">
+              <div class="row">
+                <div class="col-12">
+                  <label>Scan Result</label>
+                  <textarea
+                    id="scanResult"
+                    style="width: 100%"
+                    rows="10"
+                    class="form-control"
+                    placeholder="history"
+                    readonly
+                  ></textarea>
+                </div>
+                <div class="col-12 p-3">
+                  <div class="btn btn-primary">list in group</div>
+                  <canvas id="croppedQR" width="100" height="100"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+      const isIOS =
+        /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent) &&
+        !window.MSStream;
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const params = new URLSearchParams(window.location.search);
+
+      const session = params.get("session");
+      const user = params.get("user");
+
+      getSession();
+
+      let baseUrlGetData = null;
+      let cameraList = [];
+      const video = document.getElementById("preview");
+      const cameraSelect = document.getElementById("cameraOption");
+      const resultInput = document.getElementById("text");
+      const scanResultTextarea = document.getElementById("scanResult");
+      const croppedQRCanvas = document.getElementById("croppedQR");
+
+      let stream;
+      let lastScanData = null; // Biến để lưu trữ dữ liệu quét gần nhất
+      let lastScanTime = null; // Biến để lưu trữ thời gian quét gần nhất
+      let constraints = {
+        video: true,
+      };
+      function startCamera(deviceId) {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+
+        if (isIOS || isAndroid) {
+          constraints.video = {
+            facingMode: { ideal: "environment" },
+          };
+        } else {
+          constraints = {
+            video: {
+              deviceId: deviceId
+                ? { exact: deviceId }
+                : { facingMode: "environment" },
+              //deviceId: { exact: deviceId },
+              //facingMode: "user"
+              //facingMode: isIOS ? { exact: "environment" } : "environment"
+            },
+          };
+        }
+
+        navigator.mediaDevices
+          .getUserMedia(
+            constraints
+            //{
+            //    video: { facingMode: { exact: "environment" } }
+            //}
+          )
+          .then(function (s) {
+            stream = s;
+            video.srcObject = stream;
+            video.play();
+            requestAnimationFrame(scanQRCode);
+          })
+          .catch(function (error) {
+            console.error("Không thể truy cập camera: ", error);
+            resultInput.value = "Không thể truy cập camera.";
+          });
+      }
+
+      function populateCameraList() {
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then(function (devices) {
+            cameraSelect.innerHTML = "<option>Choose Camera</option>"; // Reset options
+
+            const videoDevices = devices.filter(
+              (device) => device.kind === "videoinput"
+            );
+            cameraList = videoDevices;
+
+            if (videoDevices.length === 0) {
+              resultInput.value = "Không tìm thấy camera nào.";
+              return;
+            }
+
+            videoDevices.forEach((device) => {
+              console.log("camera", device);
+              const option = document.createElement("option");
+              option.value = device.deviceId;
+              option.innerText =
+                device.label || `Camera ${cameraSelect.options.length}`;
+              cameraSelect.appendChild(option);
+            });
+
+            // Start with the first camera if available
+            if (videoDevices.length > 0) {
+              var arrNameDefault = [
+                "camera mặt sau",
+                "back camera",
+                "camera sau",
+                "camera chính",
+                "main camera",
+                "camera chính sau",
+              ];
+              //var defaultCamera = videoDevices.find(cam =>  cam.label.toLowerCase() == "back camera" || cam.label.toLowerCase() == "camera mặt sau");
+              var defaultCamera = videoDevices.find((cam) =>
+                arrNameDefault.some((name) =>
+                  cam.label.toLowerCase().includes(name)
+                )
+              );
+              if (defaultCamera) {
+                startCamera(defaultCamera.deviceId);
+              } else {
+                startCamera(videoDevices[0].deviceId);
+              }
+            }
+          })
+          .catch(function (error) {
+            console.error("Lỗi khi liệt kê thiết bị: ", error);
+            resultInput.value = "Lỗi khi liệt kê thiết bị camera.";
+          });
+      }
+
+      function scanQRCode() {
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          // Kích thước canvas mong muốn (bạn có thể điều chỉnh các giá trị này)
+          const canvasWidth = 400;
+          const canvasHeight = 400;
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.min(video.videoWidth, canvasWidth);
+          canvas.height = Math.min(video.videoHeight, canvasHeight);
+          const context = canvas.getContext("2d");
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageData = context.getImageData(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+          const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+          if (code) {
+            if (code.data && code.data != lastScanData) {
+              try {
+                console.log("data", code.data);
+                lastScanData = code.data; // Lưu trữ dữ liệu quét gần nhất
+                drawCroppedQRCode(code.location); // Vẽ ô vuông quanh mã QR
+                processData(code.data); // Call the function to process the data
+
+                // Optional: Stop scanning after the first successful scan
+                //if (stream) {
+                //    stream.getTracks().forEach(track => track.stop());
+                //}
+              } catch (e) {
+                console.error("error for ", code.data);
+              }
+            } else {
+              if (lastScanTime) {
+                const currentTime = new Date().getTime();
+                const timeDiff = currentTime - lastScanTime;
+
+                if (timeDiff < 5000) {
+                  // 5                                                                                                                                              giây
+                  return; // Bỏ qua nếu quét quá nhanh
+                } else {
+                  lastScanData = null; // Reset last scan data if no new data
+                }
+              }
+            }
+
+            setTimeout(() => {
+              requestAnimationFrame(scanQRCode);
+            }, 200); // Delay before scanning again
+          } else {
+            requestAnimationFrame(scanQRCode);
+          }
+        } else {
+          requestAnimationFrame(scanQRCode);
+        }
+      }
+
+      function changeCamera(deviceId) {
+        if (deviceId !== "Choose Camera") {
+          startCamera(deviceId);
+        }
+      }
+
+      function drawCroppedQRCode(location) {
+        try {
+            const croppedQRContext = canvas.getContext("2d");
+            console.log ({location})
+            const minX = Math.min(
+          location.topLeftCorner.x,
+          location.topRightCorner.x,
+          location.bottomLeftCorner.x,
+          location.bottomRightCorner.x
+        );
+        const minY = Math.min(
+          location.topLeftCorner.y,
+          location.topRightCorner.y,
+          location.bottomLeftCorner.y,
+          location.bottomRightCorner.y
+        );
+        const maxX = Math.max(
+          location.topLeftCorner.x,
+          location.topRightCorner.x,
+          location.bottomLeftCorner.x,
+          location.bottomRightCorner.x
+        );
+        const maxY = Math.max(
+          location.topLeftCorner.y,
+          location.topRightCorner.y,
+          location.bottomLeftCorner.y,
+          location.bottomRightCorner.y
+        );
+
+        const width = maxX - minX;
+        const height = maxY - minY;
+
+        croppedQRCanvas.width = width;
+        croppedQRCanvas.height = height;
+
+        croppedQRContext.drawImage(
+          canvas,
+          minX,
+          minY,
+          width,
+          height, // Source rectangle
+          0,
+          0,
+          width,
+          height // Destination rectangle
+        );
+        } catch (error) {
+            
+        }
+      }
+
+      async function processData(code) {
+        saveCheckIn(code);
+        const dataCheckin = await getData(code);
+        if (dataCheckin) {
+          if (dataCheckin.CustomerID > 0) {
+            scanResultTextarea.value =
+              `${code} - ${dataCheckin.FullName}` +
+              "\r\n" +
+              scanResultTextarea.value;
+            resultInput.value = `${code} - ${dataCheckin.FullName}`;
+            toastr.success(
+              `${code} - ${dataCheckin.FullName}`,
+              "Checkin thành công"
+            );
+          } else {
+            scanResultTextarea.value =
+              `${code} X ${dataCheckin.FullName}` +
+              "\r\n" +
+              scanResultTextarea.value;
+            resultInput.value = `${code} X ${dataCheckin.FullName}`;
+
+            toastr.error(
+              `${code} - ${dataCheckin.FullName}`,
+              "Checkin không thành công"
+            );
+          }
+
+          notification();
+        }
+      }
+
+      // Initialize camera list and start scanning
+      populateCameraList();
+
+      async function getData(data) {
+        try {
+          const response = await fetch(baseUrlGetData, {
+            //mode: 'no-cors',
+            method: "POST",
+            headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Headers": "token",
+              token: "checkin",
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              session: session,
+              user: user,
+              data: data,
+            }),
+          });
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+          const json = await response.json();
+
+          //console.log(json);
+
+          return json;
+        } catch (error) {
+          console.error(error.message);
+        }
+      }
+
+      async function getSession() {
+        try {
+          const response = await fetch(
+            `https://api2.travel.com.vn/auto/webhook/checkin-session?session=${session}`,
+            {
+              //mode: 'no-cors',
+              method: "GET",
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "token",
+                token: "checkin",
+                "Content-Type": "application/json",
+              },
+            }
+          );
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+          const json = await response.json();
+
+          //console.log(json);
+          baseUrlGetData = json.BaseUrl;
+          document.getElementById("txtSessionName").innerText =
+            json.SessionName;
+
+          return json;
+        } catch (error) {
+          console.error(error.message);
+        }
+      }
+
+      function notification() {
+        console.log("play notification sound");
+        //playBeep('square', 1000, 0.25, 1);
+        notificationDing();
+      }
+
+      function playBeep() {
+        console.log("play beep sound");
+        //playBeep('square', 1000, 0.25, 1);
+        notificationDing();
+      }
+
+      function playBeep(
+        type = "sine",
+        frequency = 440,
+        duration = 0.2,
+        volume = 0.1
+      ) {
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain(); // điều chỉnh âm lượng
+
+        oscillator.type = type; // 'sine', 'square', 'triangle', 'sawtooth'
+        oscillator.frequency.value = frequency;
+
+        gainNode.gain.value = volume;
+
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + duration);
+      }
+
+      function notificationDing() {
+        playBeep("triangle", 880, 0.1, 0.2);
+        setTimeout(() => playBeep("triangle", 1760, 0.1, 0.2), 120);
+      }
+    </script>
+
+    <script>
+      // Tên CSDL và version
+      const dbName = "CheckInDB";
+      const storeName = "CheckInRecords";
+
+      // Mở kết nối đến IndexedDB
+      function openDB() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(dbName, 1);
+
+          request.onupgradeneeded = function (event) {
+            const db = event.target.result;
+
+            // Tạo object store nếu chưa có
+            if (!db.objectStoreNames.contains(storeName)) {
+              const objectStore = db.createObjectStore(storeName, {
+                keyPath: "id", // Tự động tạo mã riêng
+                autoIncrement: true,
+              });
+
+              // Tạo index nếu cần tìm kiếm sau này
+              objectStore.createIndex("qrcode", "qrcode", { unique: true });
+              objectStore.createIndex("session", "session", { unique: false });
+              objectStore.createIndex("checkintime", "checkintime", {
+                unique: false,
+              });
+              objectStore.createIndex("issent", "issent", { unique: false });
+            }
+          };
+
+          request.onsuccess = function (event) {
+            resolve(event.target.result); // trả về db
+          };
+
+          request.onerror = function (event) {
+            reject("Lỗi mở IndexedDB: " + event.target.errorCode);
+          };
+        });
+      }
+
+      //async function saveCheckIn(qrcodeValue) {
+      //    try {
+      //        const db = await openDB();
+
+      //        const transaction = db.transaction([storeName], "readwrite");
+      //        const store = transaction.objectStore(storeName);
+
+      //        const checkInData = {
+      //            qrcode: qrcodeValue,
+      //            session: session, // Session ID
+      //            checkintime: new Date().toISOString(), // Giờ hiện tại
+      //            issent: 0 // Mặc định chưa gửi
+      //        };
+
+      //        const request = store.add(checkInData);
+
+      //        request.onsuccess = function () {
+      //            console.log("Check-in đã được lưu vào IndexedDB!");
+      //        };
+
+      //        request.onerror = function (event) {
+      //            console.error("Lỗi lưu check-in:", event.target.error);
+      //        };
+      //    } catch (e) {
+
+      //    }
+      //}
+
+      async function saveCheckIn(qrcodeValue) {
+        const db = await openDB();
+        const tx = db.transaction([storeName], "readwrite");
+        const store = tx.objectStore(storeName);
+        const index = store.index("qrcode");
+
+        // Kiểm tra xem đã tồn tại chưa
+        const checkReq = index.get(qrcodeValue);
+        checkReq.onsuccess = () => {
+          if (checkReq.result) {
+            console.warn("QR này đã được lưu trước đó.");
+            return;
+          }
+
+          // Nếu chưa có thì thêm
+          const checkInData = {
+            qrcode: qrcodeValue,
+            checkintime: new Date().toISOString(),
+            issent: 0,
+          };
+
+          const addReq = store.add(checkInData);
+          addReq.onsuccess = () => console.log("Đã lưu check-in!");
+          addReq.onerror = (e) =>
+            console.error("Lỗi khi thêm:", e.target.error);
+        };
+      }
+
+      async function getAllCheckIns() {
+        const db = await openDB();
+        const transaction = db.transaction([storeName], "readonly");
+        const store = transaction.objectStore(storeName);
+
+        const request = store.getAll();
+        request.onsuccess = function () {
+          console.log("Tất cả bản ghi check-in:", request.result);
+        };
+      }
+
+      async function getUnsentCheckIns() {
+        const db = await openDB();
+        const transaction = db.transaction([storeName], "readonly");
+        const store = transaction.objectStore(storeName);
+        const index = store.index("issent");
+
+        const request = index.getAll(0); // issent = false
+        request.onsuccess = function () {
+          console.log("Bản ghi chưa gửi:", request.result);
+        };
+      }
+      async function markAsSent(recordId) {
+        const db = await openDB();
+        const tx = db.transaction([storeName], "readwrite");
+        const store = tx.objectStore(storeName);
+
+        const getReq = store.get(recordId);
+        getReq.onsuccess = function () {
+          const record = getReq.result;
+          if (record) {
+            record.issent = true;
+
+            const updateReq = store.put(record);
+            updateReq.onsuccess = () =>
+              console.log("Đã đánh dấu là đã gửi:", recordId);
+          }
+        };
+      }
+    </script>
+  </body>
+</html>

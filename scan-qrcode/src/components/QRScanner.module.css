@@ -1,0 +1,32 @@
+.videoContainer {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.preview {
+  width: 100%;
+  border: 2px solid #000;
+  border-radius: 4px;
+}
+
+.qrCodeArea {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  border: 3px dashed red;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.cameraSelect {
+  margin-top: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  width: 100%;
+  max-width: 300px;
+} 
