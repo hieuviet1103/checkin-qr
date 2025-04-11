@@ -56,6 +56,9 @@ func main() {
 	// Set up router
 	router := gin.Default()
 
+	// Áp dụng middleware CORS cho tất cả route
+	router.Use(middlewares.CORSMiddleware())
+
 	// Routes
 	router.POST("/api/login", handlers.Login)
 

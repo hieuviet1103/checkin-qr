@@ -4,7 +4,7 @@ import { getCookie } from 'cookies-next';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import styles from './page.module.css';
+import styles from '../page.module.css';
 
 export default function Home() {
   const router = useRouter();
@@ -61,7 +61,7 @@ export default function Home() {
 
   // Chuyển hướng đến trang dashboard nếu đã đăng nhập
   if (user) {
-    router.push('/checkin-result');
+    router.push('/dashboard');
     return null;
   }
 
@@ -89,4 +89,4 @@ export default function Home() {
       </main>
     </div>
   );
-}
+} 

@@ -1,114 +1,107 @@
 'use client';
 
+import { useAuth } from '@/hooks/useAuth';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import styles from './login.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [username, setUsername] = useState('');
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch('https://api2.travel.com.vn/auto/webhook/checkin-login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "token",
-          token: "checkin"
-        },
-        body: JSON.stringify({
-          username,
-          password
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Đăng nhập thất bại');
-      }
-
-      const data = await response.json();
-      console.log(data)
-      if (data.success) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-        router.push('/scan?session=' + data.session);
-      } else {
-        setError(data.message || 'Đăng nhập thất bại');
-      }
+      await login(email, password);
+      router.push('/dashboard');
     } catch (err) {
-      setError('Có lỗi xảy ra khi đăng nhập');
+      setError(err instanceof Error ? err.message : 'Có lỗi xảy ra khi đăng nhập');
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-      <div className={styles.container}>
-        <main className={styles.formSignin}>
-          <form onSubmit={handleSubmit}>
-            <h1 className="h3 mb-3 fw-normal">Login check-in system</h1>
+    <div className={styles.container}>
+      <main className={styles.formSignin}>
+        <form onSubmit={handleSubmit}>
+          <div className="text-center mb-4">
+            <Image src={"/logo/logo-vtv.png" }
+              alt="Logo"
+              width={120}
+              height={40}
+              className="mb-3"></Image>            
+            <h1 className="h4 mb-3 fw-normal">Hệ thống Check-in</h1>
+          </div>
 
-            {error && (
-              <div className="alert alert-danger" role="alert">
-                {error}
-              </div>
-            )}
-
-            <div className="form-floating">
-              <input
-                type="text"
-                className="form-control"
-                id="floatingInput"
-                placeholder="User name"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-              <label htmlFor="floatingInput">User name</label>
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              {error}
             </div>
+          )}
 
-            <div className="form-floating">
-              <input
-                type="password"
-                className="form-control"
-                id="floatingPassword"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <label htmlFor="floatingPassword">Password</label>
-            </div>
+          <div className="form-floating">
+            <input
+              type="email"
+              className="form-control"
+              id="floatingInput"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+            <label htmlFor="floatingInput">Email</label>
+          </div>
 
-            <div className="form-check text-start my-3">
-              <input
-                className="form-check-input"
-                type="checkbox"
-                value="remember-me"
-                id="flexCheckDefault"
-              />
-              <label className="form-check-label" htmlFor="flexCheckDefault">
-                Save login
-              </label>
-            </div>
+          <div className="form-floating">
+            <input
+              type="password"
+              className="form-control"
+              id="floatingPassword"
+              placeholder="Mật khẩu"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+            <label htmlFor="floatingPassword">Mật khẩu</label>
+          </div>
 
-            <button className="w-100 btn btn-lg btn-primary" type="submit">
-              Login
-            </button>
+          <div className="form-check text-start my-3">
+            <input
+              className="form-check-input"
+              type="checkbox"
+              value="remember-me"
+              id="flexCheckDefault"
+            />
+            <label className="form-check-label" htmlFor="flexCheckDefault">
+              Ghi nhớ đăng nhập
+            </label>
+          </div>
 
-            <p className="mt-5 mb-3 text-body-secondary">
-              © 2025 vietravel.com
-            </p>
-          </form>
-        </main>
-      </div>
-    </>
+          <button 
+            className="w-100 btn btn-lg btn-primary" 
+            type="submit"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+          </button>
+
+          <p className="mt-5 mb-3 text-body-secondary text-center">
+            © 2024 vietravel.com
+          </p>
+        </form>
+      </main>
+    </div>
   );
 }

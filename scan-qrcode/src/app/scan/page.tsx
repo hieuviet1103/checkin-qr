@@ -1,8 +1,16 @@
 "use client";
 
 import QRScanner from "@/components/QRScanner";
+import { getCookie } from "cookies-next";
 import { useCallback, useEffect, useState } from "react";
 import styles from "./scan.module.css";
+
+interface UserInfo {
+  id: number;
+  name: string;
+  email: string;
+  [key: string]: string | number | boolean | null;
+}
 
 export default function ScanPage() {
   const [scanResult, setScanResult] = useState<string>("");
@@ -12,12 +20,15 @@ export default function ScanPage() {
   const [code, setCode] = useState<string>("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const session = params.get("session");
-
-    if (session) {
-      getSession(session);
+    // Lấy thông tin user từ localStorage
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+      const user = JSON.parse(userJson) as UserInfo;
+      setSessionName(user.name || 'Unnamed Session');
     }
+    
+    // Cấu hình baseUrl cho API
+    setBaseUrl("http://localhost:8080/api/scan");
   }, []);
 
   useEffect(() => {
@@ -26,46 +37,32 @@ export default function ScanPage() {
     }
   },[code]);
 
-  const getSession = async (session: string) => {
-    try {
-      const response = await fetch(
-        `https://api2.travel.com.vn/auto/webhook/checkin-session?session=${session}`,
-        {
-          method: "GET",
-          headers: {
-            token: "checkin",
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (!response.ok) throw new Error(`Response status: ${response.status}`);
-      const json = await response.json();
-      setBaseUrl(json.BaseUrl);
-      setSessionName(json.SessionName);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getData = useCallback(
     async (data: string) => {
       try {
         console.log("getData", data);
         if (!baseUrl) return null;
+        
+        const authToken = getCookie('auth_token');
+        if (!authToken) {
+          console.error("No auth token found");
+          return null;
+        }
+        
         const response = await fetch(baseUrl, {
           method: "POST",
           headers: {
-            token: "checkin",
             "Content-Type": "application/json",
+            "Authorization": `Bearer ${authToken}`,
           },
           body: JSON.stringify({
-            session: new URLSearchParams(window.location.search).get("session"),
-            user: new URLSearchParams(window.location.search).get("user"),
-            data: data,
+            code: data,
           }),
         });
+        
         if (!response.ok)
           throw new Error(`Response status: ${response.status}`);
+          
         return await response.json();
       } catch (error) {
         console.error(error);

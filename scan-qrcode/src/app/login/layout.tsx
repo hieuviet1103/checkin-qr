@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,22 +13,30 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Scan QR",
-  description: "Scan QR App",
+  title: "Đăng nhập - Scan QR",
+  description: "Trang đăng nhập",
 };
 
-export default function RootLayout({
+export default function LoginLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Loại bỏ usePathname vì nó không thể sử dụng trong Server Component
-  // Thay vào đó, chúng ta sử dụng giải pháp khác
   return (
     <html lang="en">
+      <head>
+        <link 
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" 
+          rel="stylesheet"
+        />
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         {children}
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+          defer
+        ></script>
       </body>
     </html>
   );
-}
+} 

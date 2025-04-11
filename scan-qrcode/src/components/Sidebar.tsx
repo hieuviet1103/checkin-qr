@@ -1,5 +1,6 @@
 'use client';
 
+import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const { logout } = useAuth();
 
   const toggleDropdown = () => {
     setDropdownOpen(!dropdownOpen);
@@ -20,10 +22,10 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
-    // Đọc trạng thái từ localStorage khi component mount
+    // Kiểm tra trạng thái sidebar từ localStorage
     const savedState = localStorage.getItem('sidebarCollapsed');
-    if (savedState) {
-      setCollapsed(savedState === 'true');
+    if (savedState === 'true') {
+      setCollapsed(true);
     }
   }, []);
 
@@ -119,6 +121,16 @@ export default function Sidebar() {
             </svg>
             {!collapsed && <span>Users</span>}
           </Link>
+        </li>
+        <li className="nav-item mt-auto">
+          <a 
+            className="nav-link d-flex align-items-center gap-2 cursor-pointer" 
+            onClick={logout}
+            style={{ cursor: 'pointer' }}
+          >
+            <i className="bi bi-box-arrow-right"></i>
+            Đăng xuất
+          </a>
         </li>
       </ul>
       <hr />
