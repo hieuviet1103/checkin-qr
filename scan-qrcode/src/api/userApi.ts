@@ -1,6 +1,4 @@
-import Cookies from 'js-cookie';
-
-const API_URL = 'http://localhost:8080/api';
+import api from '@/lib/api';
 
 export interface User {
   id: number;
@@ -28,30 +26,11 @@ export interface UpdateUserPayload {
   roles?: string[];
 }
 
-// Hàm lấy token xác thực từ cookie
-const getAuthHeader = () => {
-  const token = Cookies.get('auth_token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-};
-
 // Lấy danh sách người dùng
 export const getUsers = async (): Promise<User[]> => {
   try {
-    const response = await fetch(`${API_URL}/users`, {
-      method: 'GET',
-      headers: getAuthHeader()
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Không thể lấy danh sách người dùng');
-    }
-
-    const result = await response.json();
-    return result.users;
+    const response = await api.get('/users');
+    return response.data.users;
   } catch (error) {
     console.error('Lỗi khi lấy danh sách người dùng:', error);
     throw error;
@@ -61,17 +40,8 @@ export const getUsers = async (): Promise<User[]> => {
 // Lấy thông tin người dùng theo ID
 export const getUserById = async (id: number): Promise<User> => {
   try {
-    const response = await fetch(`${API_URL}/users/${id}`, {
-      method: 'GET',
-      headers: getAuthHeader()
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Không thể lấy thông tin người dùng');
-    }
-
-    return response.json();
+    const response = await api.get(`/users/${id}`);
+    return response.data.user;
   } catch (error) {
     console.error('Lỗi khi lấy thông tin người dùng:', error);
     throw error;
@@ -81,18 +51,8 @@ export const getUserById = async (id: number): Promise<User> => {
 // Tạo người dùng mới
 export const createUser = async (userData: CreateUserPayload): Promise<User> => {
   try {
-    const response = await fetch(`${API_URL}/users`, {
-      method: 'POST',
-      headers: getAuthHeader(),
-      body: JSON.stringify(userData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Không thể tạo người dùng mới');
-    }
-
-    return response.json();
+    const response = await api.post('/users', userData);
+    return response.data.user;
   } catch (error) {
     console.error('Lỗi khi tạo người dùng mới:', error);
     throw error;
@@ -102,18 +62,8 @@ export const createUser = async (userData: CreateUserPayload): Promise<User> => 
 // Cập nhật thông tin người dùng
 export const updateUser = async (id: number, userData: UpdateUserPayload): Promise<User> => {
   try {
-    const response = await fetch(`${API_URL}/users/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeader(),
-      body: JSON.stringify(userData)
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Không thể cập nhật thông tin người dùng');
-    }
-
-    return response.json();
+    const response = await api.put(`/users/${id}`, userData);
+    return response.data.user;
   } catch (error) {
     console.error('Lỗi khi cập nhật thông tin người dùng:', error);
     throw error;
@@ -123,15 +73,7 @@ export const updateUser = async (id: number, userData: UpdateUserPayload): Promi
 // Xóa người dùng
 export const deleteUser = async (id: number): Promise<void> => {
   try {
-    const response = await fetch(`${API_URL}/users/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeader()
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Không thể xóa người dùng');
-    }
+    await api.delete(`/users/${id}`);
   } catch (error) {
     console.error('Lỗi khi xóa người dùng:', error);
     throw error;
@@ -141,18 +83,8 @@ export const deleteUser = async (id: number): Promise<void> => {
 // Cập nhật quyền của người dùng
 export const updateUserRoles = async (id: number, roles: string[]): Promise<User> => {
   try {
-    const response = await fetch(`${API_URL}/users/${id}/roles`, {
-      method: 'PUT',
-      headers: getAuthHeader(),
-      body: JSON.stringify({ roles })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Không thể cập nhật quyền người dùng');
-    }
-
-    return response.json();
+    const response = await api.put(`/users/${id}/role`, { roles });
+    return response.data.user;
   } catch (error) {
     console.error('Lỗi khi cập nhật quyền người dùng:', error);
     throw error;
