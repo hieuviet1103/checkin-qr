@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  web:
+    build:
+      context: ./scan-qrcode
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT}:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+    depends_on:
+      - api
+    networks:
+      - scanqr-network
+
+  # Backend service
+  api:
+    build:
+      context: ./scan-qrcode-api
+      dockerfile: Dockerfile
+    ports:
+      - "${BACKEND_PORT}:8080"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+    depends_on:
+      - db-init
+    networks:
+      - scanqr-network
+
+  # SQL Server service
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "${DB_PORT}:1433"
+    environment:
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=${MSSQL_PID}
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - scanqr-network
+
+  # Service để thực thi init script
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./database/initScript.sql:/initScript.sql
+    command: >
+      /bin/bash -c "
+        echo 'Waiting for SQL Server to be ready...';
+        /opt/mssql-tools/bin/sqlcmd -S db -U sa -P '${MSSQL_SA_PASSWORD}' -d master -i /initScript.sql;
+        echo 'Database initialization completed!';
+      "
+    networks:
+      - scanqr-network
+
+networks:
+  scanqr-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data: 

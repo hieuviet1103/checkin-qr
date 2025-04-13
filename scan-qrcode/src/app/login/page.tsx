@@ -31,8 +31,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <main className={styles.formSignin}>
+    <div className={styles.loginPage}>
+      <div className={styles.loginContainer}>
         <form onSubmit={handleSubmit}>
           <div className="text-center mb-4">
             <Image 
@@ -52,59 +52,41 @@ export default function LoginPage() {
             </div>
           )}
 
-          <div className="form-floating">
+          <div className="form-floating mb-3">
             <input
               type="email"
-              className="form-control"
-              id="floatingInput"
-              placeholder="Email"
+              className={`form-control ${styles.formControl}`}
+              id="email"
+              placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isLoading}
             />
-            <label htmlFor="floatingInput">Email</label>
+            <label htmlFor="email">Email</label>
           </div>
 
-          <div className="form-floating">
+          <div className="form-floating mb-3">
             <input
               type="password"
-              className="form-control"
-              id="floatingPassword"
-              placeholder="Mật khẩu"
+              className={`form-control ${styles.formControl}`}
+              id="password"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              disabled={isLoading}
             />
-            <label htmlFor="floatingPassword">Mật khẩu</label>
+            <label htmlFor="password">Mật khẩu</label>
           </div>
 
-          <div className="form-check text-start my-3">
-            <input
-              className="form-check-input"
-              type="checkbox"
-              value="remember-me"
-              id="flexCheckDefault"
-            />
-            <label className="form-check-label" htmlFor="flexCheckDefault">
-              Ghi nhớ đăng nhập
-            </label>
-          </div>
-
-          <button 
-            className="w-100 btn btn-lg btn-primary" 
+          <button
+            className={`w-100 btn btn-lg btn-primary ${styles.btnPrimary}`}
             type="submit"
             disabled={isLoading}
           >
             {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
-
-          <p className="mt-5 mb-3 text-body-secondary text-center">
-            © 2025 Vietravel
-          </p>
         </form>
-      </main>
+      </div>
     </div>
   );
 }
