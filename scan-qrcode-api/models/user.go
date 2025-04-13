@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -237,4 +238,82 @@ func GetUserByEmail(email string) (*User, error) {
 	}
 
 	return &user, nil
+}
+
+// CreateUser tạo người dùng mới
+func CreateUser(username, email, password string) (*User, error) {
+	// Context với timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Tạo salt ngẫu nhiên
+	salt := generateRandomString(16)
+
+	// Gọi stored procedure để tạo user
+	var userID int
+	_, err := DB.ExecContext(ctx, "EXEC usp_CreateUser @UserName = ?, @Email = ?, @Password = ?, @Salt = ?, @UserID = ? OUTPUT",
+		username, email, password, salt, &userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Lấy thông tin user vừa tạo
+	user, err := GetUserByID(fmt.Sprint(userID))
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// UpdateUser cập nhật thông tin người dùng
+func UpdateUser(userID int, username, email string) error {
+	// Context với timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Query cập nhật thông tin user
+	query := `
+		UPDATE Users 
+		SET UserName = ?, Email = ?, UpdatedAt = GETDATE()
+		WHERE UserID = ?
+	`
+
+	_, err := DB.ExecContext(ctx, query, username, email, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// UpdateUserRole cập nhật role của người dùng
+func UpdateUserRole(userID int, role string) error {
+	// Context với timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Query cập nhật role
+	query := `
+		UPDATE Users 
+		SET Role = ?, UpdatedAt = GETDATE()
+		WHERE UserID = ?
+	`
+
+	_, err := DB.ExecContext(ctx, query, role, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Hàm helper tạo chuỗi ngẫu nhiên
+func generateRandomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, length)
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(result)
 }

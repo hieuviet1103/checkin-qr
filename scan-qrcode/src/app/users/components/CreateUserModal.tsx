@@ -24,7 +24,7 @@ export default function CreateUserModal({ show, onHide, onUserCreated }: CreateU
   const availableRoles = ['Admin', 'User', 'Manager'];
   
   // Danh sách quyền có sẵn
-  const availablePermissions = ['scan', 'dashboard', 'checkin', 'users', 'reports'];
+  const availablePermissions = ['scan', 'checkin', 'users', 'sessions', 'groups'];
 
   // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -146,7 +146,7 @@ export default function CreateUserModal({ show, onHide, onUserCreated }: CreateU
                 </select>
               </div>
               
-              <div className="mb-3">
+              <div className="mb-3 d-none">
                 <label className="form-label">Quyền hạn</label>
                 <div>
                   {availablePermissions.map(permission => (

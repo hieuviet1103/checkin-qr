@@ -7,13 +7,8 @@ import { useEffect, useState } from 'react';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { logout } = useAuth();
-
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
-  };
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -125,58 +120,7 @@ export default function Sidebar() {
         </li>
         
       </ul>
-      <hr />
-      {!collapsed && (
-        <div className="dropdown">
-          <a 
-            href="#" 
-            className="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle" 
-            onClick={toggleDropdown}
-            aria-expanded={dropdownOpen}
-          >
-            <img 
-              src="https://github.com/mdo.png" 
-              alt="" 
-              width="32" 
-              height="32" 
-              className="rounded-circle me-2" 
-            />
-            <strong>Admin</strong>
-          </a>
-          <ul className={`dropdown-menu text-small shadow ${dropdownOpen ? 'show' : ''}`}>
-            <li><a className="dropdown-item" href="#">Dự án mới...</a></li>
-            <li><a className="dropdown-item" href="#">Cài đặt</a></li>
-            <li><a className="dropdown-item" href="#">Hồ sơ</a></li>
-            <li><hr className="dropdown-divider" /></li>
-            <li><a className="dropdown-item" href="#">Đăng xuất</a></li>
-          </ul>
-        </div>
-      )}
-      {collapsed && (
-        <div className="text-center">
-          <a 
-            href="#" 
-            className="d-flex justify-content-center link-body-emphasis text-decoration-none"
-            data-title="Tài khoản"
-            onClick={toggleDropdown}
-          >
-            <img 
-              src="https://github.com/mdo.png" 
-              alt="" 
-              width="32" 
-              height="32" 
-              className="rounded-circle" 
-            />
-          </a>
-          <ul className={`dropdown-menu text-small shadow ${dropdownOpen ? 'show' : ''}`} style={{ position: 'absolute', left: '80px' }}>
-            <li><a className="dropdown-item" href="#">Dự án mới...</a></li>
-            <li><a className="dropdown-item" href="#">Cài đặt</a></li>
-            <li><a className="dropdown-item" href="#">Hồ sơ</a></li>
-            <li><hr className="dropdown-divider" /></li>
-            <li><a className="dropdown-item" href="#">Đăng xuất</a></li>
-          </ul>
-        </div>
-      )}
+      <hr />      
     </div>
   );
 } 

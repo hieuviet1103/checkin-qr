@@ -74,6 +74,9 @@ func main() {
 		// User routes
 		authRoutes.GET("/users", handlers.GetUsers)
 		authRoutes.GET("/users/:id", handlers.GetUserByID)
+		authRoutes.POST("/users", handlers.CreateUser)
+		authRoutes.PUT("/users/:id", handlers.UpdateUser)
+		authRoutes.PUT("/users/:id/role", handlers.UpdateUserRole)
 	}
 
 	// Start server
