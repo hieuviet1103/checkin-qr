@@ -1,5 +1,6 @@
 'use client';
 
+import { authAPI } from '@/lib/api';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -48,20 +49,8 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('http://localhost:8080/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Đăng nhập thất bại');
-      }
-
-      const data = await response.json();
+      const data = await authAPI.login(email, password);
+      
       if (!data.token || !data.user) {
         throw new Error('Đăng nhập thất bại: Không nhận được token hoặc thông tin người dùng');
       }
