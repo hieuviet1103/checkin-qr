@@ -47,7 +47,7 @@ export default function CustomerCheckinPage() {
       }
     };
     fetchCustomers();
-    setInterval(() => {fetchCustomers()}, 10000)
+    //setInterval(() => {fetchCustomers()}, 10000)
   }, []);
 
   // Filter customers based on search term and selected vehicles

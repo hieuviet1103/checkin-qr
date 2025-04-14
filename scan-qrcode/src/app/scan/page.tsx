@@ -1,7 +1,7 @@
 "use client";
 
 import QRScanner from "@/components/QRScanner";
-import { getCookie } from "cookies-next";
+import api from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 import styles from "./scan.module.css";
 
@@ -9,27 +9,60 @@ interface UserInfo {
   id: number;
   name: string;
   email: string;
-  [key: string]: string | number | boolean | null;
+  role: string;
+  roles: string[];
+  sessions: UserSession[];
+  //[key: string]: string | number | boolean | string[] | null | UserSession[];
+}
+
+interface UserSession {
+  session_id: number;
+  session_name: string;
+  base_url: string;
+  start_time: string;
+  end_time: string;
 }
 
 export default function ScanPage() {
   const [scanResult, setScanResult] = useState<string>("");
   const [scanHistory, setScanHistory] = useState<string[]>([]);
-  const [sessionName, setSessionName] = useState<string>("");
-  const [baseUrl, setBaseUrl] = useState<string>("");
   const [code, setCode] = useState<string>("");
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [currentSession, setCurrentSession] = useState<UserSession | null>(null);
 
   useEffect(() => {
     // Lấy thông tin user từ localStorage
     const userJson = localStorage.getItem('user');
     if (userJson) {
       const user = JSON.parse(userJson) as UserInfo;
-      setSessionName(user.name || 'Unnamed Session');
+      setUserInfo(user);
+      console.log(userJson, user)
+      // Lấy thông tin session từ localStorage
+     const currentSessionJson = user?.sessions[0];
+     if (currentSessionJson) {
+       setCurrentSession(currentSessionJson);
+     }
     }
     
-    // Cấu hình baseUrl cho API
-    setBaseUrl("http://localhost:8080/api/scan");
   }, []);
+
+  // useEffect(() => {
+  //   // Lấy session đầu tiên khi có thông tin user
+  //   const getFirstSession = async () => {
+  //     if (userInfo) {
+  //       try {
+  //         const response = await api.get(`/sessions/user/${userInfo.id}?limit=1`);
+  //         if (response.data && response.data.length > 0) {
+  //           setSessionName(response.data[0].name || 'Unnamed Session');
+  //         }
+  //       } catch (error) {
+  //         console.error('Error fetching first session:', error);
+  //       }
+  //     }
+  //   };
+
+  //   getFirstSession();
+  // }, [userInfo]);
 
   useEffect(() => {
     if(code){
@@ -41,34 +74,17 @@ export default function ScanPage() {
     async (data: string) => {
       try {
         console.log("getData", data);
-        if (!baseUrl) return null;
         
-        const authToken = getCookie('auth_token');
-        if (!authToken) {
-          console.error("No auth token found");
-          return null;
-        }
-        
-        const response = await fetch(baseUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            code: data,
-          }),
+        const response = await api.post(currentSession?.base_url ?? '/scan', {
+          code: data,
         });
         
-        if (!response.ok)
-          throw new Error(`Response status: ${response.status}`);
-          
-        return await response.json();
+        return response.data;
       } catch (error) {
         console.error(error);
       }
     },
-    [code, baseUrl]
+    [code]
   );
 
   const handleScan = async (code: string) => {
@@ -125,7 +141,7 @@ export default function ScanPage() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Checkin {sessionName}</h2>
+        <h2>Checkin {currentSession?.session_name}</h2>
       </div>
 
       <div className={styles.scanSection}>

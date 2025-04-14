@@ -12,15 +12,25 @@ import (
 
 // User là struct đại diện cho người dùng
 type User struct {
-	ID           int       `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"-"` // Không hiển thị mật khẩu trong JSON
-	Salt         string    `json:"-"` // Không hiển thị salt trong JSON
-	Role         string    `json:"role"`
-	Roles        []string  `json:"roles"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           int           `json:"id"`
+	Username     string        `json:"username"`
+	Email        string        `json:"email"`
+	PasswordHash string        `json:"-"` // Không hiển thị mật khẩu trong JSON
+	Salt         string        `json:"-"` // Không hiển thị salt trong JSON
+	Role         string        `json:"role"`
+	Roles        []string      `json:"roles"`
+	CreatedAt    time.Time     `json:"created_at"`
+	UpdatedAt    time.Time     `json:"updated_at"`
+	Sessions     []UserSession `json:"sessions"`
+}
+
+type UserSession struct {
+	UserID      int       `json:"user_id"`
+	SessionID   int       `json:"session_id"`
+	SessionName string    `json:"session_name"`
+	BaseUrl     string    `json:"base_url"`
+	StartTime   time.Time `json:"start_time"`
+	EndTime     time.Time `json:"end_time"`
 }
 
 // GetAllUsers lấy danh sách tất cả người dùng từ database
@@ -157,7 +167,54 @@ func GetUserByID(id string) (*User, error) {
 		user.UpdatedAt = time.Now()
 	}
 
+	user.Sessions, err = GetUserSessionsByID(id)
+	if err != nil {
+		return nil, err
+	}
+
 	return &user, nil
+}
+
+// GetUserSessionByID lấy danh sách thông tin session người dùng theo ID
+func GetUserSessionsByID(id string) ([]UserSession, error) {
+	// Context với timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := `
+	  select g.UserID, s.SessionID, s.SessionName, s.BaseUrl, s.StartTime, s.EndTime from SessionUserGroups g
+  		inner join Sessions s on s.SessionID = g.SessionID
+  		where g.UserID = ?
+	`
+	var userSessions []UserSession
+
+	rows, err := DB.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var userSession UserSession
+		err := rows.Scan(
+			&userSession.UserID,
+			&userSession.SessionID,
+			&userSession.SessionName,
+			&userSession.BaseUrl,
+			&userSession.StartTime,
+			&userSession.EndTime,
+		)
+		if err != nil {
+			return nil, err
+		}
+		userSessions = append(userSessions, userSession)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return userSessions, nil
 }
 
 // GetUserByEmail lấy thông tin người dùng theo email
@@ -235,6 +292,11 @@ func GetUserByEmail(email string) (*User, error) {
 		user.UpdatedAt = updatedAt.Time
 	} else {
 		user.UpdatedAt = time.Now()
+	}
+
+	user.Sessions, err = GetUserSessionsByID(fmt.Sprint(user.ID))
+	if err != nil {
+		return nil, err
 	}
 
 	return &user, nil

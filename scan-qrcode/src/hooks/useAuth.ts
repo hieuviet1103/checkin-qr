@@ -11,7 +11,16 @@ interface User {
   email: string;
   role: string;
   roles: string[];
-  [key: string]: string | number | boolean | string[] | null;
+  sessions: UserSession[];
+  [key: string]: string | number | boolean | string[] | null | UserSession[];
+}
+
+interface UserSession {
+  session_id: number;
+  session_name: string;
+  base_url: string;
+  start_time: string;
+  end_time: string;
 }
 
 export const useAuth = () => {
@@ -57,6 +66,7 @@ export const useAuth = () => {
 
       // Lưu token và thông tin người dùng
       Cookies.set('auth_token', data.token, { expires: 1 });
+      
       localStorage.setItem('user', JSON.stringify(data.user));
       setUser(data.user);
       setInitialized(true);
