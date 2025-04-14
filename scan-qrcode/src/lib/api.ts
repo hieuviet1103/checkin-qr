@@ -74,4 +74,105 @@ export const userAPI = {
   },
 };
 
+// Session API
+export const sessionAPI = {
+  // Lấy danh sách sessions
+  getSessions: async () => {
+    const response = await api.get('/sessions');
+    return response.data;
+  },
+
+  // Lấy thông tin session theo ID
+  getSessionById: async (id: string) => {
+    const response = await api.get(`/sessions/${id}`);
+    return response.data;
+  },
+
+  // Tạo session mới
+  createSession: async (sessionData: {
+    session_name: string;
+  }) => {
+    const response = await api.post('/sessions', sessionData);
+    return response.data;
+  },
+
+  // Cập nhật session
+  updateSession: async (id: string, sessionData: {
+    session_name: string;
+  }) => {
+    const response = await api.put(`/sessions/${id}`, sessionData);
+    return response.data;
+  },
+
+  // Xóa session
+  deleteSession: async (id: string) => {
+    const response = await api.delete(`/sessions/${id}`);
+    return response.data;
+  },
+};
+
+// Group API
+export const groupAPI = {
+  // Lấy danh sách groups
+  getGroups: async () => {
+    const response = await api.get('/groups');
+    return response.data;
+  },
+
+  // Lấy thông tin group theo ID
+  getGroupById: async (id: string) => {
+    const response = await api.get(`/groups/${id}`);
+    return response.data;
+  },
+
+  // Tạo group mới
+  createGroup: async (groupData: {
+    group_name: string;
+  }) => {
+    const response = await api.post('/groups', groupData);
+    return response.data;
+  },
+
+  // Cập nhật group
+  updateGroup: async (id: string, groupData: {
+    group_name: string;
+  }) => {
+    const response = await api.put(`/groups/${id}`, groupData);
+    return response.data;
+  },
+
+  // Xóa group
+  deleteGroup: async (id: string) => {
+    const response = await api.delete(`/groups/${id}`);
+    return response.data;
+  },
+};
+
+// Session User Group API
+export const sessionUserGroupAPI = {
+  // Gán user vào session và group
+  assignUserToSessionGroup: async (sessionId: string, userId: string, groupId: string) => {
+    const response = await api.post(`/sessions/${sessionId}/users/${userId}/groups/${groupId}`);
+    return response.data;
+  },
+
+  // Cập nhật trạng thái của user trong session và group
+  updateUserSessionGroup: async (sessionId: string, userId: string, groupId: string, isActive: boolean) => {
+    const response = await api.put(`/sessions/${sessionId}/users/${userId}/groups/${groupId}`, { is_active: isActive });
+    return response.data;
+  },
+
+  // Xóa user khỏi session và group
+  removeUserFromSessionGroup: async (sessionId: string, userId: string, groupId: string) => {
+    const response = await api.delete(`/sessions/${sessionId}/users/${userId}/groups/${groupId}`);
+    return response.data;
+  },
+
+  // Lấy danh sách session và group của user
+  getUserSessionGroups: async (userId: string) => {
+    const response = await api.get(`/users/${userId}/sessions`);
+    return response.data;
+  },
+};
+
 export default api; 

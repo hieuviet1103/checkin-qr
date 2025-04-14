@@ -95,6 +95,30 @@ export default function Sidebar() {
         
         <li>
           <Link 
+            href="/sessions" 
+            className={`nav-link ${pathname === '/sessions' ? 'active' : 'link-body-emphasis'}`}
+            data-title="users"
+          >
+            <svg className="bi pe-none me-2" width="16" height="16">
+              <use xlinkHref="#people-circle"></use>
+            </svg>
+            {!collapsed && <span>Sessions</span>}
+          </Link>
+        </li>
+        <li>
+          <Link 
+            href="/groups" 
+            className={`nav-link ${pathname === '/groups' ? 'active' : 'link-body-emphasis'}`}
+            data-title="users"
+          >
+            <svg className="bi pe-none me-2" width="16" height="16">
+              <use xlinkHref="#people-circle"></use>
+            </svg>
+            {!collapsed && <span>Groups</span>}
+          </Link>
+        </li>
+        <li>
+          <Link 
             href="/users" 
             className={`nav-link ${pathname === '/users' ? 'active' : 'link-body-emphasis'}`}
             data-title="users"
