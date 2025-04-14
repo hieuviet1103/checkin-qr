@@ -1,5 +1,6 @@
 'use client';
 
+import { userAPI } from '@/lib/api';
 import { getCookie } from 'cookies-next';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -24,22 +25,12 @@ export default function Home() {
     // Nếu có token, thử lấy thông tin người dùng từ API
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          // Nếu API trả về lỗi, xóa token và chuyển hướng đến trang đăng nhập
-          document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-          router.push('/login');
-        }
+        const data = await userAPI.getProfile();
+        setUser(data.user);
       } catch (error) {
         console.error('Lỗi khi lấy thông tin người dùng:', error);
+        // Nếu API trả về lỗi, xóa token và chuyển hướng đến trang đăng nhập
+        document.cookie = 'auth_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         router.push('/login');
       } finally {
         setIsLoading(false);
