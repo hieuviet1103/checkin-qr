@@ -24,10 +24,10 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
   const handleSubmit = async (values: { group_name: string }) => {
     try {
       await onSubmit(values);
-      message.success(initialValues ? 'Cập nhật group thành công' : 'Tạo group thành công');
+      //message.success(initialValues ? 'Cập nhật group thành công' : 'Tạo group thành công');
       form.resetFields();
-    } catch (error) {
-      message.error(initialValues ? 'Không thể cập nhật group' : 'Không thể tạo group');
+    } catch  {
+      message.error(initialValues ? 'Không thể cập nhật vị trí' : 'Không thể tạo vị trí');
     }
   };
 
@@ -40,10 +40,10 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
     >
       <Form.Item
         name="group_name"
-        label="Tên Group"
-        rules={[{ required: true, message: 'Vui lòng nhập tên group' }]}
+        label="Tên vị trí"
+        rules={[{ required: true, message: 'Vui lòng nhập tên vị trí' }]}
       >
-        <Input placeholder="Nhập tên group" />
+        <Input placeholder="Nhập tên vị trí" />
       </Form.Item>
 
       <Form.Item>

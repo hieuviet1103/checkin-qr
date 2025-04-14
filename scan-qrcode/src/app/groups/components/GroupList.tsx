@@ -1,57 +1,36 @@
 'use client';
 
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Table, message } from 'antd';
+import '@ant-design/v5-patch-for-react-19';
+import { Button, Modal, Table } from 'antd';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
 
 interface Group {
   group_id: number;
   group_name: string;
-  create_at: string;
+  created_at?: string;
 }
 
 interface GroupListProps {
   onEdit: (group: Group) => void;
+  onDelete: (group: Group) => void;
+  groups: Group[];
+  loading: boolean;
 }
 
-export default function GroupList({ onEdit }: GroupListProps) {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchGroups = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/groups', {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch groups');
-      const data = await response.json();
-      setGroups(data.groups);
-    } catch (error) {
-      message.error('Không thể tải danh sách groups');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      const response = await fetch(`/api/groups/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to delete group');
-      message.success('Xóa group thành công');
-      fetchGroups();
-    } catch (error) {
-      message.error('Không thể xóa group');
-    }
+export default function GroupList({ onEdit, onDelete, groups, loading }: GroupListProps) {
+  const handleDelete = (group: Group) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa',
+      content: `Bạn có chắc chắn muốn xóa vị trí "${group.group_name}"?`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk() {
+        onDelete(group);
+      },
+    });
   };
 
   const columns = [
@@ -61,20 +40,20 @@ export default function GroupList({ onEdit }: GroupListProps) {
       key: 'group_id',
     },
     {
-      title: 'Tên Group',
+      title: 'Tên vị trí',
       dataIndex: 'group_name',
       key: 'group_name',
     },
     {
       title: 'Ngày tạo',
-      dataIndex: 'create_at',
-      key: 'create_at',
-      render: (date: string) => format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi }),
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => date && format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi }),
     },
     {
       title: 'Thao tác',
       key: 'action',
-      render: (_: any, record: Group) => (
+      render: (_: unknown, record: Group) => (
         <div className="space-x-2">
           <Button
             type="text"
@@ -85,16 +64,12 @@ export default function GroupList({ onEdit }: GroupListProps) {
             type="text"
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.group_id)}
+            onClick={() => handleDelete(record)}
           />
         </div>
       ),
     },
   ];
-
-  useEffect(() => {
-    fetchGroups();
-  }, []);
 
   return (
     <Table

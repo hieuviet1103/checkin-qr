@@ -132,17 +132,13 @@ export const groupAPI = {
   },
 
   // Tạo group mới
-  createGroup: async (groupData: {
-    group_name: string;
-  }) => {
+  createGroup: async (groupData: { group_name: string }) => {
     const response = await api.post('/groups', groupData);
     return response.data;
   },
 
   // Cập nhật group
-  updateGroup: async (id: string, groupData: {
-    group_name: string;
-  }) => {
+  updateGroup: async (id: string, groupData: { group_name: string }) => {
     const response = await api.put(`/groups/${id}`, groupData);
     return response.data;
   },
