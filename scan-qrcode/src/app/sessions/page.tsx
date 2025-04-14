@@ -10,13 +10,16 @@ import SessionList from './components/SessionList';
 interface Session {
   session_id: number;
   session_name: string;
+  start_time: string | null;
+  end_time: string | null;
+  base_url: string;
 }
 
 export default function SessionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
 
-  const handleCreateSession = async (values: { session_name: string }) => {
+  const handleCreateSession = async (values: { session_name: string, start_time: string, end_time: string, base_url: string }) => {
     try {
       await sessionAPI.createSession(values);
       message.success('Tạo session thành công');
@@ -26,7 +29,7 @@ export default function SessionsPage() {
     }
   };
 
-  const handleUpdateSession = async (values: { session_name: string }) => {
+  const handleUpdateSession = async (values: { session_name: string, start_time: string, end_time: string, base_url: string }) => {
     if (!editingSession?.session_id) return;
     try {
       await sessionAPI.updateSession(editingSession.session_id.toString(), values);
@@ -40,6 +43,7 @@ export default function SessionsPage() {
 
   const showModal = (session?: Session) => {
     if (session) {
+      console.log(session);
       setEditingSession(session);
     }
     setIsModalOpen(true);

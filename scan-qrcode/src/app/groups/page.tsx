@@ -1,8 +1,7 @@
 "use client";
 
-import { sessionAPI } from '@/lib/api';
 import { PlusOutlined } from '@ant-design/icons';
-import { Button, Modal, message } from 'antd';
+import { Button, Modal } from 'antd';
 import { useState } from 'react';
 import GroupForm from './components/GroupForm';
 import GroupList from './components/GroupList';
@@ -12,15 +11,9 @@ interface Group {
   group_name: string;
 }
 
-interface Session {
-  session_id: number;
-  session_name: string;
-}
-
 export default function GroupsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
-  const [editingSession, setEditingSession] = useState<Session | null>(null);
 
   const handleCreateGroup = async (values: { group_name: string }) => {
     try {
@@ -58,15 +51,6 @@ export default function GroupsPage() {
     }
   };
 
-  const handleCreateSession = async (values: { session_name: string }) => {
-    try {
-      await sessionAPI.createSession(values);
-      message.success('Tạo session thành công');
-      setIsModalOpen(false);
-    } catch {
-      message.error('Không thể tạo session');
-    }
-  };
 
   const showModal = (group?: Group) => {
     if (group) {

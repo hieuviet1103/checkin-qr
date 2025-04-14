@@ -91,6 +91,9 @@ export const sessionAPI = {
   // Tạo session mới
   createSession: async (sessionData: {
     session_name: string;
+    start_time: string;
+    end_time: string;
+    base_url: string;
   }) => {
     const response = await api.post('/sessions', sessionData);
     return response.data;
@@ -99,6 +102,9 @@ export const sessionAPI = {
   // Cập nhật session
   updateSession: async (id: string, sessionData: {
     session_name: string;
+    start_time: string;
+    end_time: string;
+    base_url: string;
   }) => {
     const response = await api.put(`/sessions/${id}`, sessionData);
     return response.data;

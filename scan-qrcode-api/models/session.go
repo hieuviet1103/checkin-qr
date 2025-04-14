@@ -2,44 +2,73 @@ package models
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 )
 
 type Session struct {
-	SessionID   int       `json:"session_id" db:"SessionID"`
-	SessionName string    `json:"session_name" db:"SessionName"`
-	StartTime   time.Time `json:"start_time" db:"StartTime"`
-	EndTime     time.Time `json:"end_time" db:"EndTime"`
-	CreatedAt   time.Time `json:"created_at" db:"CreatedAt"`
-	BaseUrl     string    `json:"base_url" db:"BaseUrl"`
+	SessionID   int          `json:"session_id" db:"SessionID"`
+	SessionName string       `json:"session_name" db:"SessionName"`
+	StartTime   sql.NullTime `json:"-" db:"StartTime"`
+	EndTime     sql.NullTime `json:"-" db:"EndTime"`
+	CreatedAt   sql.NullTime `json:"-" db:"CreatedAt"`
+	BaseUrl     string       `json:"base_url" db:"BaseUrl"`
+}
+
+// MarshalJSON implements custom JSON marshaling
+func (s Session) MarshalJSON() ([]byte, error) {
+	type Alias Session
+	return json.Marshal(&struct {
+		*Alias
+		StartTime *time.Time `json:"start_time,omitempty"`
+		EndTime   *time.Time `json:"end_time,omitempty"`
+	}{
+		Alias:     (*Alias)(&s),
+		StartTime: s.getStartTime(),
+		EndTime:   s.getEndTime(),
+	})
+}
+
+func (s Session) getStartTime() *time.Time {
+	if s.StartTime.Valid {
+		return &s.StartTime.Time
+	}
+	return nil
+}
+
+func (s Session) getEndTime() *time.Time {
+	if s.EndTime.Valid {
+		return &s.EndTime.Time
+	}
+	return nil
 }
 
 type SessionRequest struct {
-	SessionName string    `json:"session_name" binding:"required"`
-	StartTime   time.Time `json:"start_time"`
-	EndTime     time.Time `json:"end_time"`
-	BaseUrl     string    `json:"base_url"`
+	SessionName string `json:"session_name" binding:"required"`
+	StartTime   string `json:"start_time"`
+	EndTime     string `json:"end_time"`
+	BaseUrl     string `json:"base_url" binding:"required"`
 }
 
 type SessionResponse struct {
-	SessionID   int       `json:"session_id"`
-	SessionName string    `json:"session_name"`
-	StartTime   time.Time `json:"start_time"`
-	EndTime     time.Time `json:"end_time"`
-	CreatedAt   time.Time `json:"created_at"`
-	BaseUrl     string    `json:"base_url"`
+	SessionID   int    `json:"session_id"`
+	SessionName string `json:"session_name"`
+	StartTime   string `json:"start_time,omitempty"`
+	EndTime     string `json:"end_time,omitempty"`
+	CreatedAt   string `json:"created_at,omitempty"`
+	BaseUrl     string `json:"base_url"`
 }
 
 // CreateSession tạo session mới
 func CreateSession(req SessionRequest) (int, error) {
 	query := `
-		INSERT INTO Sessions (SessionName, StartTime, EndTime, BaseUrl)
-		VALUES (@p1, @p2, @p3, @p4)
-		SELECT SCOPE_IDENTITY() as SessionID
+		INSERT INTO Sessions (SessionName, BaseUrl)
+		VALUES (?, ?);
+		SELECT SCOPE_IDENTITY() as SessionID;
 	`
 
 	var sessionID int
-	err := DB.QueryRow(query, req.SessionName, req.StartTime, req.EndTime, req.BaseUrl).Scan(&sessionID)
+	err := DB.QueryRow(query, req.SessionName, req.BaseUrl).Scan(&sessionID)
 	if err != nil {
 		return 0, err
 	}
@@ -68,6 +97,7 @@ func GetSessions() ([]Session, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		sessions = append(sessions, s)
 	}
 
@@ -98,11 +128,11 @@ func GetSessionByID(id int) (*Session, error) {
 func UpdateSession(id int, req SessionRequest) error {
 	query := `
 		UPDATE Sessions
-		SET SessionName = @p1, StartTime = @p2, EndTime = @p3, BaseUrl = @p4
-		WHERE SessionID = @p5
+		SET SessionName = @p1, BaseUrl = @p2
+		WHERE SessionID = @p3
 	`
 
-	_, err := DB.Exec(query, req.SessionName, req.StartTime, req.EndTime, req.BaseUrl, id)
+	_, err := DB.Exec(query, req.SessionName, req.BaseUrl, id)
 	return err
 }
 

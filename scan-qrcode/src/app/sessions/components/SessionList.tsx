@@ -10,7 +10,9 @@ import { useEffect, useState } from 'react';
 interface Session {
   session_id: number;
   session_name: string;
-  create_at: string;
+  start_time: string | null;
+  end_time: string | null;
+  created_at: string | null;
 }
 
 interface SessionListProps {
@@ -26,7 +28,7 @@ export default function SessionList({ onEdit }: SessionListProps) {
       setLoading(true);
       const response = await sessionAPI.getSessions();
       console.log(response);
-      //setSessions(response);
+      setSessions(response);
     } catch {
       message.error('Không thể tải danh sách sessions');
     } finally {
@@ -56,10 +58,22 @@ export default function SessionList({ onEdit }: SessionListProps) {
       key: 'session_name',
     },
     {
+      title: 'Từ',
+      dataIndex: 'start_time',
+      key: 'start_time',
+      render: (date: string) => date && format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi }),
+    },
+    {
+      title: 'Đến',
+      dataIndex: 'end_time',
+      key: 'end_time',
+      render: (date: string) => date && format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi }),
+    },
+    {
       title: 'Ngày tạo',
-      dataIndex: 'create_at',
-      key: 'create_at',
-      render: (date: string) => format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi }),
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (date: string) => date && format(new Date(date), 'dd/MM/yyyy HH:mm', { locale: vi }),
     },
     {
       title: 'Thao tác',
