@@ -79,6 +79,35 @@ func main() {
 		authRoutes.PUT("/users/:id/role", handlers.UpdateUserRole)
 	}
 
+	// Session routes
+	sessionRoutes := authRoutes.Group("/sessions")
+	{
+		sessionRoutes.POST("", handlers.CreateSession)
+		sessionRoutes.GET("", handlers.GetSessions)
+		sessionRoutes.GET("/:id", handlers.GetSessionByID)
+		sessionRoutes.PUT("/:id", handlers.UpdateSession)
+		sessionRoutes.DELETE("/:id", handlers.DeleteSession)
+	}
+
+	// Group routes
+	groupRoutes := authRoutes.Group("/groups")
+	{
+		groupRoutes.POST("", handlers.CreateGroup)
+		groupRoutes.GET("", handlers.GetGroups)
+		groupRoutes.GET("/:id", handlers.GetGroupByID)
+		groupRoutes.PUT("/:id", handlers.UpdateGroup)
+		groupRoutes.DELETE("/:id", handlers.DeleteGroup)
+	}
+
+	// SessionUserGroup routes
+	sessionUserGroupRoutes := authRoutes.Group("/session-user-groups")
+	{
+		sessionUserGroupRoutes.POST("", handlers.AssignUserToSessionGroup)
+		sessionUserGroupRoutes.GET("/user/:user_id", handlers.GetUserSessionGroups)
+		sessionUserGroupRoutes.PUT("", handlers.UpdateUserSessionGroup)
+		sessionUserGroupRoutes.DELETE("/:session_id/:user_id/:group_id", handlers.RemoveUserFromSessionGroup)
+	}
+
 	// Start server
 	log.Printf("Server starting on port %s", port)
 	if err := router.Run(":" + port); err != nil {
