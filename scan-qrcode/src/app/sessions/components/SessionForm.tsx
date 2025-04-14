@@ -50,12 +50,12 @@ export default function SessionForm({ initialValues, onSubmit, onCancel }: Sessi
 
       const formattedValues = {
         session_name: values.session_name,
-        start_time: values.start_time.format('YYYY-MM-DDTHH:mm:ssZ'),
-        end_time: values.end_time.format('YYYY-MM-DDTHH:mm:ssZ'),
+        start_time: values.start_time.format('YYYY-MM-DD HH:mm:ss'),
+        end_time: values.end_time.format('YYYY-MM-DD HH:mm:ss'),
         base_url: values.base_url,
       };
       await onSubmit(formattedValues);
-      form.resetFields();
+      //form.resetFields();
     } catch {
       message.error(initialValues ? 'Không thể cập nhật session' : 'Không thể tạo session');
     }

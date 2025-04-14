@@ -3,27 +3,35 @@
 import { sessionAPI } from '@/lib/api';
 import { PlusOutlined } from '@ant-design/icons';
 import { Button, Modal, message } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import SessionForm from './components/SessionForm';
 import SessionList from './components/SessionList';
 
 interface Session {
   session_id: number;
   session_name: string;
-  start_time: string | null;
-  end_time: string | null;
+  start_time?: string;
+  end_time?: string;
   base_url: string;
 }
 
 export default function SessionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSession, setEditingSession] = useState<Session | null>(null);
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(false);
 
+  
+  useEffect(() => {
+    fetchSessions();
+  }, []);
+  
   const handleCreateSession = async (values: { session_name: string, start_time: string, end_time: string, base_url: string }) => {
     try {
       await sessionAPI.createSession(values);
       message.success('Tạo session thành công');
       setIsModalOpen(false);
+      fetchSessions();
     } catch {
       message.error('Không thể tạo session');
     }
@@ -36,11 +44,32 @@ export default function SessionsPage() {
       message.success('Cập nhật session thành công');
       setIsModalOpen(false);
       setEditingSession(null);
+      fetchSessions();
     } catch {
       message.error('Không thể cập nhật session');
     }
   };
+  const handleDelete = async (session: Session) => {
+    try {
+      await sessionAPI.deleteSession(session.session_id.toString());
+      message.success('Xóa session thành công');
+      fetchSessions();
+    } catch {
+      message.error('Không thể xóa session');
+    }
+  };
 
+  const fetchSessions = async () => {
+    try {
+      setLoading(true);
+      const response = await sessionAPI.getSessions();
+      setSessions(response);
+    } catch {
+      message.error('Không thể tải danh sách sessions');
+    } finally {
+      setLoading(false);
+    }
+  };
   const showModal = (session?: Session) => {
     if (session) {
       console.log(session);
@@ -67,7 +96,7 @@ export default function SessionsPage() {
         </Button>
       </div>
 
-      <SessionList onEdit={showModal} />
+      <SessionList onEdit={showModal} onDelete={handleDelete} sessions={sessions} loading={loading} />
 
       <Modal
         title={editingSession ? 'Cập nhật Session' : 'Tạo Session mới'}
@@ -78,7 +107,7 @@ export default function SessionsPage() {
         <SessionForm
           initialValues={editingSession || undefined}
           onSubmit={editingSession ? handleUpdateSession : handleCreateSession}
-          onCancel={handleCancel}
+          onCancel={handleCancel}          
         />
       </Modal>
     </div>

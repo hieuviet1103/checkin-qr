@@ -1,49 +1,39 @@
 'use client';
 
-import { sessionAPI } from '@/lib/api';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { Button, Table, message } from 'antd';
+import '@ant-design/v5-patch-for-react-19';
+import { Button, Modal, Table } from 'antd';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { useEffect, useState } from 'react';
 
 interface Session {
   session_id: number;
   session_name: string;
-  start_time: string | null;
-  end_time: string | null;
-  created_at: string | null;
+  start_time?: string;
+  end_time?: string;
+  created_at?: string;
+  base_url: string;
 }
 
 interface SessionListProps {
   onEdit: (session: Session) => void;
+  onDelete: (session: Session) => void;
+  sessions: Session[];
+  loading: boolean;
 }
 
-export default function SessionList({ onEdit }: SessionListProps) {
-  const [sessions, setSessions] = useState<Session[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchSessions = async () => {
-    try {
-      setLoading(true);
-      const response = await sessionAPI.getSessions();
-      console.log(response);
-      setSessions(response);
-    } catch {
-      message.error('Không thể tải danh sách sessions');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    try {
-      await sessionAPI.deleteSession(id.toString());
-      message.success('Xóa session thành công');
-      fetchSessions();
-    } catch {
-      message.error('Không thể xóa session');
-    }
+export default function SessionList({ onEdit, onDelete, sessions, loading }: SessionListProps) {
+  const handleDelete = (session: Session) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa',
+      content: `Bạn có chắc chắn muốn xóa session "${session.session_name}"?`,
+      okText: 'Xóa',
+      okType: 'danger',
+      cancelText: 'Hủy',
+      onOk() {
+        onDelete(session);
+      },
+    });
   };
 
   const columns = [
@@ -89,16 +79,16 @@ export default function SessionList({ onEdit }: SessionListProps) {
             type="text"
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.session_id)}
+            onClick={() => handleDelete(record)}
           />
         </div>
       ),
     },
   ];
 
-  useEffect(() => {
-    fetchSessions();
-  }, []);
+//   useEffect(() => {
+//     fetchSessions();
+//   }, []);
 
   return (
     <Table

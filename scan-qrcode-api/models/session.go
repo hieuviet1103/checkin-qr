@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -81,6 +82,7 @@ func GetSessions() ([]Session, error) {
 	query := `
 		SELECT SessionID, SessionName, StartTime, EndTime, CreatedAt, BaseUrl
 		FROM Sessions
+		where ISNULL(IsDeleted, 0) = 0
 		ORDER BY CreatedAt DESC
 	`
 
@@ -128,19 +130,29 @@ func GetSessionByID(id int) (*Session, error) {
 func UpdateSession(id int, req SessionRequest) error {
 	query := `
 		UPDATE Sessions
-		SET SessionName = @p1, BaseUrl = @p2
-		WHERE SessionID = @p3
+		SET SessionName = ?, BaseUrl = ?, 
+			StartTime = CASE WHEN ? = '' THEN NULL ELSE CONVERT(datetime, ?, 120) END,
+			EndTime = CASE WHEN ? = '' THEN NULL ELSE CONVERT(datetime, ?, 120) END
+		WHERE SessionID = ?
 	`
 
-	_, err := DB.Exec(query, req.SessionName, req.BaseUrl, id)
+	_, err := DB.Exec(query,
+		req.SessionName,
+		req.BaseUrl,
+		req.StartTime, req.StartTime,
+		req.EndTime, req.EndTime,
+		id,
+	)
+	fmt.Println(err)
 	return err
 }
 
 // DeleteSession xóa session
 func DeleteSession(id int) error {
 	query := `
-		DELETE FROM Sessions
-		WHERE SessionID = @p1
+		UPDATE Sessions
+		SET IsDeleted = 1
+		WHERE SessionID = ?
 	`
 
 	_, err := DB.Exec(query, id)
