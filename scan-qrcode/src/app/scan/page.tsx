@@ -46,23 +46,23 @@ export default function ScanPage() {
     
   }, []);
 
-  // useEffect(() => {
-  //   // Lấy session đầu tiên khi có thông tin user
-  //   const getFirstSession = async () => {
-  //     if (userInfo) {
-  //       try {
-  //         const response = await api.get(`/sessions/user/${userInfo.id}?limit=1`);
-  //         if (response.data && response.data.length > 0) {
-  //           setSessionName(response.data[0].name || 'Unnamed Session');
-  //         }
-  //       } catch (error) {
-  //         console.error('Error fetching first session:', error);
-  //       }
-  //     }
-  //   };
+  useEffect(() => {
+    // Lấy session đầu tiên khi có thông tin user
+    const getFirstSession = async () => {
+      if (userInfo) {
+        try {
+          // const response = await api.get(`/sessions/user/${userInfo.id}?limit=1`);
+          // if (response.data && response.data.length > 0) {
+          //   setSessionName(response.data[0].name || 'Unnamed Session');
+          // }
+        } catch (error) {
+          console.error('Error fetching first session:', error);
+        }
+      }
+    };
 
-  //   getFirstSession();
-  // }, [userInfo]);
+    getFirstSession();
+  }, [userInfo]);
 
   useEffect(() => {
     if(code){
