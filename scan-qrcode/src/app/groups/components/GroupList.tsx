@@ -1,14 +1,16 @@
 'use client';
 
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import '@ant-design/v5-patch-for-react-19';
-import { Button, Modal, Table } from 'antd';
+import { Button, Modal, Table, Tooltip } from 'antd';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
 interface Group {
   group_id: number;
   group_name: string;
+  latitude: number;
+  longitude: number;
   created_at?: string;
 }
 
@@ -43,6 +45,23 @@ export default function GroupList({ onEdit, onDelete, groups, loading }: GroupLi
       title: 'Tên vị trí',
       dataIndex: 'group_name',
       key: 'group_name',
+    },
+    {
+      title: 'Vị trí',
+      key: 'location',
+      render: (_: unknown, record: Group) => (
+        record.latitude && record.longitude && (
+        <Tooltip title={`${record.latitude}, ${record.longitude}`}>
+          <Button
+            type="text"
+            icon={<EnvironmentOutlined />}
+            onClick={() => window.open(`https://www.google.com/maps?q=${record.latitude},${record.longitude}`, '_blank')}
+          >
+            Xem trên Google Maps
+          </Button>
+        </Tooltip>
+        )
+      ),
     },
     {
       title: 'Ngày tạo',

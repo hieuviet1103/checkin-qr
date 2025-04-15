@@ -11,6 +11,8 @@ import GroupList from './components/GroupList';
 interface Group {
   group_id: number;
   group_name: string;
+  latitude: number;
+  longitude: number;
   created_at?: string;
 }
 
@@ -32,7 +34,7 @@ export default function GroupsPage() {
     }
   };
 
-  const handleCreateGroup = async (values: { group_name: string }) => {
+  const handleCreateGroup = async (values: { group_name: string; latitude: number; longitude: number }) => {
     try {
       await groupAPI.createGroup(values);
       message.success('Tạo vị trí thành công');
@@ -43,7 +45,7 @@ export default function GroupsPage() {
     }
   };
 
-  const handleUpdateGroup = async (values: { group_name: string }) => {
+  const handleUpdateGroup = async (values: { group_name: string; latitude: number; longitude: number }) => {
     if (!editingGroup) return;
 
     try {
@@ -107,10 +109,15 @@ export default function GroupsPage() {
           setEditingGroup(null);
         }}
         footer={null}
+        width={800}
       >
         <GroupForm
-          initialValues={editingGroup ? { group_name: editingGroup.group_name } : undefined}
-          onSubmit={editingGroup ? handleUpdateGroup : handleCreateGroup}
+          initialValues={editingGroup ? {
+            group_name: editingGroup.group_name,
+            latitude: editingGroup.latitude,
+            longitude: editingGroup.longitude
+          } : undefined}
+          onSubmit={ editingGroup ? handleUpdateGroup : handleCreateGroup }
           onCancel={() => {
             setIsModalOpen(false);
             setEditingGroup(null);

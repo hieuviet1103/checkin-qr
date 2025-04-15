@@ -1,14 +1,24 @@
 'use client';
 
-import { Button, Form, Input, message } from 'antd';
+import Geocoding from '@/components/Geocoding';
+import { Button, Form, Input } from 'antd';
+import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
+const MapComponent = dynamic(() => import('@/components/Map'), { ssr: false });
+
+interface GroupFormValues {
+  group_name: string;
+  latitude?: number;
+  longitude?: number;
+}
 
 interface GroupFormProps {
   initialValues?: {
-    group_id?: number;
     group_name: string;
+    latitude?: number;
+    longitude?: number;
   };
-  onSubmit: (values: { group_name: string }) => Promise<void>;
+  onSubmit: (values: GroupFormValues) => void;
   onCancel: () => void;
 }
 
@@ -19,16 +29,20 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
     if (initialValues) {
       form.setFieldsValue(initialValues);
     }
-  }, [initialValues, form]);
+  }, [form, initialValues]);
 
-  const handleSubmit = async (values: { group_name: string }) => {
+  const handleSubmit = async (values: GroupFormValues) => {
     try {
       await onSubmit(values);
       //message.success(initialValues ? 'Cập nhật group thành công' : 'Tạo group thành công');
       form.resetFields();
-    } catch  {
-      message.error(initialValues ? 'Không thể cập nhật vị trí' : 'Không thể tạo vị trí');
+    } catch (error) {
+      console.error('Error submitting form:', error);
     }
+  };
+
+  const handleMapClick = (lat: number, lng: number) => {
+    form.setFieldsValue({ latitude: lat, longitude: lng });
   };
 
   return (
@@ -36,14 +50,32 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
       form={form}
       layout="vertical"
       onFinish={handleSubmit}
-      initialValues={initialValues}
+      initialValues={{ latitude: 10.762622, longitude: 106.660172 }}
     >
       <Form.Item
         name="group_name"
         label="Tên vị trí"
         rules={[{ required: true, message: 'Vui lòng nhập tên vị trí' }]}
       >
-        <Input placeholder="Nhập tên vị trí" />
+        <Input />
+      </Form.Item>
+      <Geocoding />
+      <Form.Item label="Vị trí trên bản đồ">
+        <div className="h-[400px] w-full rounded-lg overflow-hidden">
+          <MapComponent
+            onMapClick={handleMapClick}
+            initialLat={form.getFieldValue('latitude')}
+            initialLng={form.getFieldValue('longitude')}
+          />
+        </div>
+      </Form.Item>
+
+      <Form.Item name="latitude" hidden>
+        <Input type="number" />
+      </Form.Item>
+
+      <Form.Item name="longitude" hidden>
+        <Input type="number" />
       </Form.Item>
 
       <Form.Item>

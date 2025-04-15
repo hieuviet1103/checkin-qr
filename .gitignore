@@ -1,2 +1,3 @@
 scan-qrcode/.next/
 scan-qrcode/node_modules/
+**.env
