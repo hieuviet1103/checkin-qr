@@ -1,25 +1,23 @@
 import axios from 'axios';
 
-const GEOCODING_API_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
+const GEOCODING_API_URL = 'https://n8n.vietravel.com/webhook/get-geocoding';
+
+interface Location {
+  lat: string;
+  lon: string;
+  display_name: string;
+  class: string;
+  type: string;
+}
 
 interface GeocodingResponse {
-  results: {
-    geometry: {
-      location: {
-        lat: number;
-        lng: number;
-      };
-    };
-    formatted_address: string;
-  }[];
-  status: string;
+  location: Location[];
 }
 
 export async function forwardGeocode(address: string): Promise<GeocodingResponse> {
   const response = await axios.get<GeocodingResponse>(GEOCODING_API_URL, {
     params: {
-      address,
-      key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+      q: address,
     },
   });
   return response.data;
@@ -28,8 +26,7 @@ export async function forwardGeocode(address: string): Promise<GeocodingResponse
 export async function reverseGeocode(lat: number, lng: number): Promise<GeocodingResponse> {
   const response = await axios.get<GeocodingResponse>(GEOCODING_API_URL, {
     params: {
-      latlng: `${lat},${lng}`,
-      key: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+      q: `${lat},${lng}`,
     },
   });
   return response.data;

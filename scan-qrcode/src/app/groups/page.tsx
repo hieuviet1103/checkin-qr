@@ -45,7 +45,7 @@ export default function GroupsPage() {
     }
   };
 
-  const handleUpdateGroup = async (values: { group_name: string; latitude: number; longitude: number }) => {
+  const handleUpdateGroup = async (values: { group_name: string; latitude?: number; longitude?: number }) => {
     if (!editingGroup) return;
 
     try {
@@ -73,6 +73,7 @@ export default function GroupsPage() {
     setEditingGroup(group);
     setIsModalOpen(true);
   };
+
 
   useEffect(() => {
     fetchGroups();

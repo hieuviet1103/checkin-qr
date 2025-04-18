@@ -78,9 +78,9 @@ export default function SessionForm({ initialValues, onSubmit, onCancel }: Sessi
 
       <Form.Item
         name="start_time"
-        initialValue={initialValues?.start_time ? dayjs(initialValues.start_time) : null}
+        initialValue={initialValues?.start_time ? dayjs(initialValues.start_time) : dayjs('2025-01-01 00:00:00')}
         label="Thời gian bắt đầu"
-        rules={[{ required: true, message: 'Vui lòng chọn thời gian bắt đầu' }]}
+        rules={[{ required: false, message: 'Vui lòng chọn thời gian bắt đầu' }]}
       >
         <DatePicker
           showTime
@@ -92,7 +92,7 @@ export default function SessionForm({ initialValues, onSubmit, onCancel }: Sessi
 
       <Form.Item
         name="end_time"
-        initialValue={initialValues?.end_time ? dayjs(initialValues.end_time) : null}
+        initialValue={initialValues?.end_time ? dayjs(initialValues.end_time) : dayjs('2025-01-01 00:00:00')}
         label="Thời gian kết thúc"
         rules={[{ required: true, message: 'Vui lòng chọn thời gian kết thúc' }]}
       >

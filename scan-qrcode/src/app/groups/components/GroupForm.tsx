@@ -1,6 +1,7 @@
 'use client';
 
 import Geocoding from '@/components/Geocoding';
+import { GeocodeResult } from '@/interfaces/maps/geocoding';
 import { Button, Form, Input } from 'antd';
 import dynamic from 'next/dynamic';
 import { useEffect } from 'react';
@@ -44,6 +45,11 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
   const handleMapClick = (lat: number, lng: number) => {
     form.setFieldsValue({ latitude: lat, longitude: lng });
   };
+  
+  const handleGetGeocoding = async (result: GeocodeResult) => {
+
+    console.log(result);
+  }
 
   return (
     <Form
@@ -59,7 +65,7 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
       >
         <Input />
       </Form.Item>
-      <Geocoding />
+      <Geocoding onResult={handleGetGeocoding} />
       <Form.Item label="Vị trí trên bản đồ">
         <div className="h-[400px] w-full rounded-lg overflow-hidden">
           <MapComponent
