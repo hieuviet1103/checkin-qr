@@ -38,7 +38,7 @@ const Geocoding: React.FC<GeocodeProps> = ({ onResult }) => {
           type: location.type,
           class: location.class
         });
-        onResult({
+        onResult?.({
           address: location.display_name,
           lat: parseFloat(location.lat),
           lng: parseFloat(location.lon),

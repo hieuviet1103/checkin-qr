@@ -34,7 +34,7 @@ export default function GroupsPage() {
     }
   };
 
-  const handleCreateGroup = async (values: { group_name: string; latitude: number; longitude: number }) => {
+  const handleCreateGroup = async (values: { group_name: string; latitude?: number; longitude?: number }) => {
     try {
       await groupAPI.createGroup(values);
       message.success('Tạo vị trí thành công');

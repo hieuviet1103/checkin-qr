@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 // pages/index.tsx
 
@@ -100,9 +101,9 @@ const Map: React.FC = () => {
 
   // Custom component to handle map events
   const MapEvents = () => {
-    const map = dynamic(() => import('react-leaflet').then((mod) => mod.useMapEvents))({
-      click: handleMapClick,
-    });
+    // const map = dynamic(() => import('react-leaflet').then((mod) => mod.useMapEvents))({
+    //   click: handleMapClick,
+    // });
     return null;
   };
 

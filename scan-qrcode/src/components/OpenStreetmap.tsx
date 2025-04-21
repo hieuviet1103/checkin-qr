@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // pages/index.js
 import { LatLngExpression, LatLngTuple } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -23,9 +24,9 @@ const Popup = dynamic(
 );
 // Custom component to handle map events
 const MapEvents = (handleMapClick: (e: L.LeafletMouseEvent) =>  void) => {
-  const map = dynamic(() => import('react-leaflet').then((mod) => mod.useMapEvents))({
-    click: handleMapClick,
-  });
+  // const map = dynamic(() => import('react-leaflet').then((mod) => mod.useMapEvents))({
+  //   click: handleMapClick,
+  // });
   return null;
 };
 // Kiểu dữ liệu cho props
@@ -99,7 +100,7 @@ const handleMapClick = async (e: L.LeafletMouseEvent) => {
             </Popup>
           </Marker>
         )}
-        <MapEvents handleMapClick={handleMapClick} />
+        {/* <MapEvents handleMapClick={handleMapClick} /> */}
         </MapContainer>
 
         {/* <MapContainer
