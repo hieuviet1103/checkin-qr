@@ -3,7 +3,7 @@
 import { GeocodeResult } from '@/interfaces/maps/geocoding';
 import { EnvironmentOutlined, SearchOutlined } from '@ant-design/icons';
 import { Alert, Button, Card, Divider, Input, Space, Typography } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { forwardGeocode, reverseGeocode } from '../lib/geocoding';
 import OpenStreetmap from './OpenStreetmap';
 
@@ -11,14 +11,22 @@ const { Title, Text } = Typography;
 
 interface GeocodeProps {
   onResult?: (result: GeocodeResult) => void;
+  initialAddress?: string;
+  initialLatLng?: { lat: number; lng: number };
 }
 
-const Geocoding: React.FC<GeocodeProps> = ({ onResult }) => {
-  const [address, setAddress] = useState('');
-  const [latLng, setLatLng] = useState({ lat: '', lng: '' });
+const Geocoding: React.FC<GeocodeProps> = ({ onResult, initialAddress, initialLatLng }) => {
+  const [address, setAddress] = useState(initialAddress || '');
+  const [latLng, setLatLng] = useState(initialLatLng || { lat: 0, lng: 0 });
   const [result, setResult] = useState<GeocodeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (latLng) {
+    console.log('latLng:', latLng);
+    }
+  }, [latLng]);
 
   const handleForwardGeocode = async () => {
     if (!address.trim()) {
@@ -45,6 +53,7 @@ const Geocoding: React.FC<GeocodeProps> = ({ onResult }) => {
           type: location.type,
           class: location.class
         });
+        setLatLng({ lat: parseFloat(location.lat), lng: parseFloat(location.lon) });
       } else {
         setError('Không tìm thấy tọa độ cho địa chỉ này');
       }
@@ -56,8 +65,8 @@ const Geocoding: React.FC<GeocodeProps> = ({ onResult }) => {
   };
 
   const handleReverseGeocode = async () => {
-    const lat = parseFloat(latLng.lat);
-    const lng = parseFloat(latLng.lng);
+    const lat = latLng.lat;
+    const lng = latLng.lng;
     if (isNaN(lat) || isNaN(lng)) {
       setError('Vui lòng nhập tọa độ hợp lệ');
       return;
@@ -116,13 +125,13 @@ const Geocoding: React.FC<GeocodeProps> = ({ onResult }) => {
             <Input
               placeholder="Vĩ độ"
               value={latLng.lat}
-              onChange={(e) => setLatLng({ ...latLng, lat: e.target.value })}
+              onChange={(e) => setLatLng({ ...latLng, lat: parseFloat(e.target.value) })}
               style={{ width: '45%' }}
             />
             <Input
               placeholder="Kinh độ"
               value={latLng.lng}
-              onChange={(e) => setLatLng({ ...latLng, lng: e.target.value })}
+              onChange={(e) => setLatLng({ ...latLng, lng: parseFloat(e.target.value) })}
               style={{ width: '45%' }}
             />
             <Button 
@@ -178,11 +187,17 @@ const Geocoding: React.FC<GeocodeProps> = ({ onResult }) => {
           </>
         )}
 
-<OpenStreetmap 
+{/* <OpenStreetmap 
           center={result?.lat && result?.lng ? { lat: result.lat, lng: result.lng } : { lat: 10.7789241, lng: 106.6880843 }} 
           markerPosition={result?.lat && result?.lng ? { lat: result.lat, lng: result.lng } : { lat: 10.7789241, lng: 106.6880843 }}
           address={result?.address}
+        /> */}
+<OpenStreetmap 
+          center={latLng?.lat && latLng?.lng ? { lat:   latLng.lat, lng: latLng.lng } : { lat: 10.3357995, lng: 107.0889511 }} 
+          markerPosition={latLng?.lat && latLng?.lng ? { lat: latLng.lat, lng: latLng.lng } : { lat: 10.3357995, lng: 107.0889511 }}
+          address={result?.address}
         />
+
         {/* <GoogleMapDisplay 
           center={result?.lat && result?.lng ? { lat: result.lat, lng: result.lng } : { lat: 10.7789241, lng: 106.6880843 }} 
         /> */}

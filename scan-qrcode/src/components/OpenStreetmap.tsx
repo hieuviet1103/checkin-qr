@@ -48,7 +48,7 @@ interface MarkerData {
   address: string;
 }
 
- const OpenStreetmap: React.FC<OpenStreetmapDisplayProps> = ({ center, markerPosition = { lat: 10.7789241, lng: 106.6880843 }, address}) => {  
+ const OpenStreetmap: React.FC<OpenStreetmapDisplayProps> = ({ center, markerPosition = { lat: 10.3357995, lng: 107.0889511 }, address}) => {  
   const [marker, setMarker] = useState<MarkerData | null>(null);
   const initialPosition: LatLngTuple = [21.0285, 105.8542]; // Hanoi
 // Function to handle map click and reverse geocoding

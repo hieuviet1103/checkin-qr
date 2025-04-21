@@ -49,6 +49,7 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
   const handleGetGeocoding = async (result: GeocodeResult) => {
 
     console.log(result);
+    form.setFieldsValue({ latitude: result.lat, longitude: result.lng });
   }
 
   return (
@@ -65,7 +66,7 @@ export default function GroupForm({ initialValues, onSubmit, onCancel }: GroupFo
       >
         <Input />
       </Form.Item>
-      <Geocoding onResult={handleGetGeocoding} />
+      <Geocoding onResult={handleGetGeocoding} initialAddress={form.getFieldValue('group_name')} initialLatLng={{ lat: form.getFieldValue('latitude'), lng: form.getFieldValue('longitude') }} />
       <Form.Item label="Vị trí trên bản đồ">
         <div className="h-[400px] w-full rounded-lg overflow-hidden">
           <MapComponent
