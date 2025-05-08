@@ -397,7 +397,7 @@
         saveCheckIn(code);
         const dataCheckin = await getData(code);
         if (dataCheckin) {
-          if (dataCheckin.CustomerID > 0) {
+          if (dataCheckin.CustomerID.length > 0) {
             scanResultTextarea.value =
               `${code} - ${dataCheckin.FullName}` +
               "\r\n" +
