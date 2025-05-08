@@ -110,7 +110,7 @@ export default function Sidebar() {
           </Link>
         </li>
 
-        {user && user.role === "admin" && (
+        {user && user.roles.some(role=> role == "admin") && (
           <li>
             <Link
               href="/sessions"
@@ -126,7 +126,7 @@ export default function Sidebar() {
             </Link>
           </li>
         )}
-        {user && user.role === "admin" && (
+        {user && user.roles.some(role=> role == "admin") && (
           <li>
             <Link
               href="/groups"
@@ -142,7 +142,7 @@ export default function Sidebar() {
             </Link>
           </li>
         )}
-        {user && user.role === "admin" && (
+        {user && user.roles.some(role=> role == "admin") && (
           <li>
             <Link
               href="/users"
