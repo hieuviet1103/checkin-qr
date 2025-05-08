@@ -2,6 +2,7 @@
 
 import QRScanner from "@/components/QRScanner";
 import api from "@/lib/api";
+import { redirect } from 'next/navigation';
 import { useCallback, useEffect, useState } from "react";
 import styles from "./scan.module.css";
 
@@ -41,9 +42,9 @@ export default function ScanPage() {
      const currentSessionJson = user?.sessions[0];
      if (currentSessionJson) {
        setCurrentSession(currentSessionJson);
+       redirect(`/scan.html?session=${currentSessionJson.session_id}&user=${user.id}`);
      }
-    }
-    
+    }    
   }, []);
 
   useEffect(() => {
