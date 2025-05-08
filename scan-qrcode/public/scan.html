@@ -142,7 +142,7 @@
                   ></textarea>
                 </div>
                 <div class="col-12 p-3">
-                  <div class="btn btn-primary">list in group</div>
+                  <!-- <div class="btn btn-primary">list in group</div> -->
                   <canvas id="croppedQR" width="100" height="100"></canvas>
                 </div>
               </div>
@@ -458,7 +458,7 @@
       async function getSession() {
         try {
           const response = await fetch(
-            `https://api2.travel.com.vn/auto/webhook/checkin-session?session=${session}`,
+            `https://n8n.vietravel.com/webhook/checkin-session?session=${session}`,
             {
               //mode: 'no-cors',
               method: "GET",
